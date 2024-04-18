@@ -1,0 +1,28 @@
+#!/bin/sh
+
+bw=$1
+plr=$2
+del=$3
+
+shift 3
+
+tool=$@
+
+down_bandwidth="$1"
+down_packets_dropped="$2"
+down_delay="$3"
+
+up_bandwidth="$1"
+up_packets_dropped="$2"
+up_delay="$3"
+
+(cat /etc/pf.conf && echo "dummynet-anchor \"conditioning\"") | pfctl -f -
+dnctl pipe 10 config bw "$down_bandwidth" plr "$down_packets_dropped" delay "$down_delay"
+dnctl pipe 20 config bw "$up_bandwidth" plr "$up_packets_dropped" delay "$up_delay"
+(echo "dummynet in proto udp from any to any pipe 10" && echo "dummynet out proto udp from any to any pipe 20")  | pfctl -a conditioning -f -
+
+token=$(pfctl -E 2>&1 | grep "Token" | cut -d ' ' -f 3)
+
+$tool || true 
+
+pfctl -X $token
