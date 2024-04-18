@@ -9,6 +9,8 @@ A macOS script that configures `dummynet` and `pf` for UDP network conditioning 
 Usage
 --
 
+With sudo or as root:
+
 ```sh
 ./condition <bandwidth> <packet loss rate> <delay> tool [tool-args]
 ```
